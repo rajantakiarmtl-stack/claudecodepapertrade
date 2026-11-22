@@ -108,7 +108,8 @@ def main():
                            "pnl_pct": round(pnl / risk * 100, 1) if risk else None,
                            "exit_reason_label": label(EXIT_HINTS, t.get("exit_reason"), "Closed by the agents"),
                            "legs": [{"contract": l["occ"], "side": l["side"], "ratio": l.get("ratio", 1)} for l in t.get("legs") or []],
-                           "entry_price": t.get("entry_net"), "exit_price": t.get("exit_net"),
+                           "entry_price": abs(t["entry_net"]) if t.get("entry_net") is not None else None,
+                           "exit_price": abs(t["exit_net"]) if t.get("exit_net") is not None else None,
                            "why_text": None, "outcome_text": None})
         else:
             open_pos.append({**base, "unrealized_pct": None})
@@ -130,16 +131,19 @@ def main():
     bars = get(f"{DATA}/stocks/SPY/bars?timeframe=1Day&start={days[0]}&feed=iex&limit=1000").get("bars", [])
     spy = {dt.date.fromisoformat(b["t"][:10]): b["c"] for b in bars}
     spy0 = spy.get(days[0]) or next(iter(spy.values()), None)
+    # Account value shown is the broker value minus the cost haircut of trades closed so far, so it agrees with
+    # the after-cost P&L everywhere else on the site.
+    cuts = [(dt.date.fromisoformat(t["closed"][:10]), 2 * (t.get("haircut_per_side_usd") or 0)) for t in trades if t.get("closed")]
     snaps, peak, mdd = [], START_EQUITY, 0.0
     for d in days:
-        v = eq[d]
+        v = round(eq[d] - sum(c for cd, c in cuts if cd <= d), 2)
         peak = max(peak, v)
         mdd = min(mdd, (v - peak) / peak * 100)
         s = spy.get(d)
         snaps.append({"date": d.isoformat(), "account_value": v,
                       "spy_close_rebased": round(START_EQUITY * s / spy0, 2) if s and spy0 else None})
 
-    acct = eq[days[-1]]
+    acct = snaps[-1]["account_value"]
     wins = [c for c in closed if c["pnl_net"] > 0]
     spy_ret = None
     if snaps and snaps[-1]["spy_close_rebased"]:
