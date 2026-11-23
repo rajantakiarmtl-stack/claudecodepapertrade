@@ -26,6 +26,8 @@ START_EQUITY = 100000.0
 
 STRUCTURES = {
     "call_vertical": "Defined-risk call spread",
+    "put_debit_vertical": "Defined-risk put spread",
+    "call_debit_vertical": "Defined-risk call spread",
     "put_vertical": "Defined-risk put spread",
     "put_vertical_0dte": "Same-day put spread",
     "call_vertical_0dte": "Same-day call spread",
@@ -127,8 +129,12 @@ def main():
 
     hist = get(PAPER + "/account/portfolio/history?period=3M&timeframe=1D")
     eq = {dt.datetime.fromtimestamp(ts, ET).date(): e for ts, e in zip(hist["timestamp"], hist["equity"]) if e}
+    # The daily history only gains today's row later in the evening; use the live equity for today.
+    today = dt.datetime.now(ET).date()
+    if today not in eq and today.weekday() < 5 and dt.datetime.now(ET).hour >= 16:
+        eq[today] = float(get(PAPER + "/account")["equity"])
     days = sorted(d for d in eq if d >= START - dt.timedelta(days=1))
-    bars = get(f"{DATA}/stocks/SPY/bars?timeframe=1Day&start={days[0]}&feed=iex&limit=1000").get("bars", [])
+    bars = get(f"{DATA}/stocks/SPY/bars?timeframe=1Day&start={days[0]}&feed=sip&limit=1000").get("bars", [])
     spy = {dt.date.fromisoformat(b["t"][:10]): b["c"] for b in bars}
     spy0 = spy.get(days[0]) or next(iter(spy.values()), None)
     # Account value shown is the broker value minus the cost haircut of trades closed so far, so it agrees with
