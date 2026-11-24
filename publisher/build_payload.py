@@ -51,6 +51,7 @@ REJECT_CATEGORIES = [
     (("dte", "delta", "size", "structure"), "No contract fit the plan"),
 ]
 EXIT_HINTS = [
+    ("worthless", "Expired worthless (a tiny test position)"),
     ("thesis_failed", "The trade idea stopped working, so the agents cut it"),
     ("pin", "Price pinned near the strike; exited early"),
     ("target", "Hit the profit target"),
@@ -99,12 +100,18 @@ def main():
 
     closed, open_pos = [], []
     for t in trades:
+        label_ = STRUCTURES.get(t.get("structure"), "Options position")
+        # Every leg expiring on the open date = a same-day (0DTE) trade; the OCC symbol carries YYMMDD.
+        exps = {l["occ"][len(t["symbol"]):len(t["symbol"]) + 6] for l in t.get("legs") or []}
+        if t.get("opened") and exps == {t["opened"][2:10].replace("-", "")}:
+            label_ = "Same-day " + label_.replace("Defined-risk ", "").lower().replace("same-day ", "")
         base = {"id": t["trade_id"], "ticker": t["symbol"], "team_id": t.get("team") or "desk",
-                "structure_label": STRUCTURES.get(t.get("structure"), "Options position"),
+                "structure_label": label_,
                 "direction": "Bullish" if t.get("direction") == "bull" else "Bearish",
                 "opened_at": et(t.get("opened"))}
         if t.get("closed"):
-            risk = t.get("max_loss_usd") or None
+            # % of the most the trade could lose including the cost haircut, so tiny probes can't show -300%.
+            risk = ((t.get("max_loss_usd") or 0) + 2 * (t.get("haircut_per_side_usd") or 0)) or None
             pnl = net_pnl(t)
             closed.append({**base, "closed_at": et(t["closed"]), "pnl_net": pnl,
                            "pnl_pct": round(pnl / risk * 100, 1) if risk else None,
