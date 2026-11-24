@@ -107,7 +107,7 @@ def main():
             label_ = "Same-day " + label_.replace("Defined-risk ", "").lower().replace("same-day ", "")
         base = {"id": t["trade_id"], "ticker": t["symbol"], "team_id": t.get("team") or "desk",
                 "structure_label": label_,
-                "direction": "Bullish" if t.get("direction") == "bull" else "Bearish",
+                "direction": {"bull": "Bullish", "bear": "Bearish"}.get(t.get("direction"), "Neutral"),
                 "opened_at": et(t.get("opened"))}
         if t.get("closed"):
             # % of the most the trade could lose including the cost haircut, so tiny probes can't show -300%.
