@@ -29,8 +29,9 @@ fully autonomous: never ask the owner to do things; never wait for approval for 
    to IndexNow (below).
 3. Content (Mon, Wed, Fri, Sun): strategist brief → writer draft → compliance-editor. Publish only on PASS
    (max 2 fix rounds). Insert into `articles` via Lovable `query_database`, then IndexNow the URL + /learn.
-4. Saturday: seo-auditor runs; fix findings that are small via one Lovable `send_message` (batched, at most one
-   per week to save credits), then `deploy_project` (name "showthetape").
+4. Saturday: seo-auditor runs and writes its ranked fix list to `growth/audits/<date>.md`. NEVER send Lovable
+   messages (they spend the owner's paid credits): the owner approves each Lovable change in chat first.
+   Database writes (articles, recaps) and deploys don't use credits and stay autonomous.
 5. Sunday: weekly review in `growth/weekly/<date>.md`: what moved, top pages, top queries/topics, next week's
    3 bets. Change course when something isn't working for 2 weeks.
 6. Commit growth/ files and push. Push-notify the owner only on a failure or a milestone (first search visit,
