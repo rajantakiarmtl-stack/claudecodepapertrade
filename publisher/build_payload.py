@@ -38,6 +38,8 @@ STRUCTURES = {
     "credit_call_spread": "Call credit spread",
     "butterfly": "Butterfly",
     "calendar": "Calendar spread",
+    "call_calendar": "Calendar spread",
+    "put_calendar": "Calendar spread",
     "long_call": "Long call",
     "long_put": "Long put",
 }
@@ -53,6 +55,8 @@ REJECT_CATEGORIES = [
 EXIT_HINTS = [
     ("worthless", "Expired worthless (a tiny test position)"),
     ("thesis_failed", "The trade idea stopped working, so the agents cut it"),
+    ("invalidation", "The setup broke, so the agents exited"),
+    ("exit by", "Closed on schedule before the bell"),
     ("pin", "Price pinned near the strike; exited early"),
     ("target", "Hit the profit target"),
     ("stop", "Stopped out"),
