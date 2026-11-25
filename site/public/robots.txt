@@ -1,0 +1,21 @@
+User-agent: Googlebot
+Allow: /
+Disallow: /tape
+
+User-agent: Bingbot
+Allow: /
+Disallow: /tape
+
+User-agent: Twitterbot
+Allow: /
+Disallow: /tape
+
+User-agent: facebookexternalhit
+Allow: /
+Disallow: /tape
+
+User-agent: *
+Allow: /
+Disallow: /tape
+
+Sitemap: https://showthetape.com/sitemap.xml
