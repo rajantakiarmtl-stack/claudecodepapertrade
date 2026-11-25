@@ -7,6 +7,13 @@ search engines (referrer google/bing/duckduckgo), new signups, pages indexed.
 The team runs from the "Show The Tape growth" scheduled task in the owner's main session. The owner wants it
 fully autonomous: never ask the owner to do things; never wait for approval for the routine work below.
 
+## Current status (update when it changes)
+- 2026-11-25: Journal/Learn pages, robots.txt, IndexNow key file and /tape noindex exist in the Lovable code but
+  are NOT deployed yet: the Lovable workspace dropped to the free plan and ran out of credits before the build
+  was verified, and the /sitemap.xml route is still missing. Until a verified deploy: still write and publish
+  articles to the `articles` table (they appear once deployed), but skip IndexNow pings and the Saturday Lovable
+  fix message.
+
 ## The team (`.claude/agents/`)
 | Agent | Job |
 |---|---|
