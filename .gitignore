@@ -4,3 +4,7 @@ site/.env
 site/node_modules/
 site/dist/
 site/.wrangler/
+site/.output/
+site/.wstate/
+site/.nitro/
+site/.tanstack/

@@ -1,4 +1,4 @@
-"""Turn publisher/out/payload.json (+ optional publisher/out/narrative.json) into one SQL upsert script.
+"""Turn publisher/out/payload.json (SQLite / Cloudflare D1 dialect) (+ optional publisher/out/narrative.json) into one SQL upsert script.
 
 narrative.json (written by the daily Claude run) looks like:
   {"trades": {"<trade_id>": {"why_text": "...", "outcome_text": "..."}},
@@ -21,12 +21,12 @@ def q(v):
     if isinstance(v, (int, float)):
         return repr(v)
     if isinstance(v, (list, dict)):
-        return "'" + json.dumps(v).replace("'", "''") + "'::jsonb"
+        return "'" + json.dumps(v).replace("'", "''") + "'"  # JSON stored as TEXT in Cloudflare D1
     return "'" + str(v).replace("'", "''") + "'"
 
 
 def arr(v):
-    return "NULL" if v is None else "ARRAY[" + ",".join(q(x) for x in v) + "]::text[]" if v else "'{}'::text[]"
+    return "NULL" if v is None else q(list(v))
 
 
 def upsert(table, rows, key, keep=()):
@@ -52,7 +52,7 @@ def main():
         t["agent_count"] = extra.get("agent_count")
         t["roles"] = extra.get("roles")
 
-    sql = ["BEGIN;"]
+    sql = []
     sql += upsert("site_meta", [{"id": 1, **p["site_meta"]}], "id")
     sql += upsert("daily_snapshots", p["daily_snapshots"], "date")
     sql += upsert("teams", p["teams"], "id", keep=("activity_line", "agent_count", "roles"))
@@ -63,7 +63,6 @@ def main():
     sql += upsert("passed_on", p["passed_on"], "id")
     if n.get("recap"):
         sql += upsert("daily_recaps", [n["recap"]], "date")
-    sql.append("COMMIT;")
     open(os.path.join(OUT, "load.sql"), "w").write("\n".join(sql) + "\n")
     print(f"wrote {os.path.join(OUT, 'load.sql')} ({sum(len(s) for s in sql)} chars)")
 

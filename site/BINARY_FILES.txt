@@ -1,0 +1,3 @@
+Binary files in Lovable project d3a9340a-7645-45e9-85a5-dbe70c6bc472 (not exported; fetch from the Lovable editor or GitHub sync):
+public/favicon.svg
+public/og.png
